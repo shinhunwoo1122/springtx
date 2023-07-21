@@ -132,8 +132,30 @@ public class BasicTxTest {
                 .isInstanceOf(UnexpectedRollbackException.class);
     }
 
+
+
+
     @Test
     void inner_rollback_requires_new(){
+        log.info("외부 트랜잭션 시작");
+        TransactionStatus outer = txManager.getTransaction(new DefaultTransactionAttribute());
+        log.info("outer.isNewTransaction={}", outer.isNewTransaction()); //true
+
+        log.info("내부 트랜잭션 시작");
+        DefaultTransactionAttribute definition = new DefaultTransactionAttribute();
+        definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW); //새로 트랜잭션을 생성
+        TransactionStatus inner = txManager.getTransaction(definition);
+        log.info("inner.isNewTransaction={}", inner.isNewTransaction()); //true
+
+        log.info("내부 트랜잭션 롤백");
+        txManager.rollback(inner);
+        log.info("외부 트랜잭션 커밋");
+        txManager.commit(outer);
+
+    }
+
+    @Test
+    void inner_rollback_requires_new1(){
         log.info("외부 트랜잭션 시작");
         TransactionStatus outer = txManager.getTransaction(new DefaultTransactionAttribute());
         log.info("outer.isNewTransaction={}", outer.isNewTransaction()); //true
